@@ -4,6 +4,7 @@ import JoinBlock from './components/JoinBlock'
 import socket from './socket'
 import Chat from './components/Chat'
 import axios from 'axios'
+import {Switch, Route} from "react-router-dom";
 
 // reducer - убрать в отдельный файл
 const reducer = (state, action) => {
@@ -57,6 +58,7 @@ function App() {
     // отправка от клиента запросы на бэк
     // emit отправляет
     const { data } = await axios.get(`http://localhost:9999/rooms/${obj.roomId}`)
+    if(!data.users.includes(obj.userName)) data.users.push(obj.userName)
     // получаем актуальные данные по юзерам и сообщениям по http
     setUsers(data.users)
   }
@@ -95,14 +97,21 @@ function App() {
   return (
     <div className="App">
       {/* <button onClick={() => connectSocket()}>CONNECT</button> */}
-      {!state.joined ? <JoinBlock onLogin={onLogin} /> 
-      : <Chat
-          users={state.users}
-          messages={state.messages} 
-          userName={state.userName}
-          roomId={state.roomId}
-          onAddMessage={addMessage}
-        />}
+      <Switch>
+        <Route exact path="/">
+          <JoinBlock onLogin={onLogin} />
+        </Route>
+        <Route path="/:chat_id">
+          <Chat
+            onLogin={onLogin}
+            users={state.users}
+            messages={state.messages}
+            userName={state.userName}
+            roomId={state.roomId}
+            onAddMessage={addMessage}
+          />
+        </Route>
+      </Switch>
     </div>
   );
 }
